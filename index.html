@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lightweight Charts Indicators</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: #1e1e1e;
+        color: #d1d4dc;
+      }
+      .tabs {
+        display: flex;
+        gap: 4px;
+        padding: 8px;
+        background: #141414;
+        border-bottom: 1px solid #2B2B43;
+      }
+      .tab {
+        padding: 8px 16px;
+        background: transparent;
+        border: 1px solid #2B2B43;
+        border-radius: 4px;
+        color: #d1d4dc;
+        cursor: pointer;
+        font-size: 14px;
+      }
+      .tab:hover {
+        background: #2B2B43;
+      }
+      .tab.active {
+        background: #26a69a;
+        border-color: #26a69a;
+        color: #fff;
+      }
+      #chart {
+        width: 100vw;
+        height: calc(100vh - 50px);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="tabs" id="tabs"></div>
+    <div id="chart"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
