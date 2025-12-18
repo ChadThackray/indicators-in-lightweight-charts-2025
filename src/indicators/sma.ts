@@ -1,9 +1,5 @@
 import { LineData, UTCTimestamp } from 'lightweight-charts';
-
-interface OHLCData {
-  time: UTCTimestamp;
-  close: number;
-}
+import { OHLCData } from '../types';
 
 export function calculateSMA(
   data: OHLCData[],

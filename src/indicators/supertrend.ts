@@ -1,12 +1,5 @@
 import { UTCTimestamp } from 'lightweight-charts';
-
-interface OHLCData {
-  time: UTCTimestamp;
-  open: number;
-  high: number;
-  low: number;
-  close: number;
-}
+import { OHLCData } from '../types';
 
 function calculateATR(data: OHLCData[], period: number): number[] {
   const trueRanges: number[] = [];

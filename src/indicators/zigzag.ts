@@ -1,12 +1,5 @@
 import { LineData, UTCTimestamp } from 'lightweight-charts';
-
-interface OHLCData {
-  time: UTCTimestamp;
-  open: number;
-  high: number;
-  low: number;
-  close: number;
-}
+import { OHLCData } from '../types';
 
 export interface ZigZagPoint {
   time: UTCTimestamp;
