@@ -39,8 +39,7 @@ function segmentByTrend(data: SupertrendPoint[]): { uptrend: LineData<UTCTimesta
 
 export async function render(container: HTMLElement): Promise<void> {
   const chart = createChart(container, {
-    width: container.clientWidth,
-    height: container.clientHeight,
+    autoSize: true,
     layout: {
       background: { color: '#1e1e1e' },
       textColor: '#d1d4dc',
@@ -96,10 +95,4 @@ export async function render(container: HTMLElement): Promise<void> {
     to: data.length,
   });
 
-  window.addEventListener('resize', () => {
-    chart.applyOptions({
-      width: container.clientWidth,
-      height: container.clientHeight,
-    });
-  });
 }
