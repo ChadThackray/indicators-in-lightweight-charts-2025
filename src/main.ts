@@ -3,8 +3,11 @@ import { render as renderRSI } from './examples/rsi';
 import { render as renderZigZag } from './examples/zigzag';
 import { render as renderSupertrend } from './examples/supertrend';
 import { render as renderMACD } from './examples/macd';
+import { render as renderSMARealtime } from './examples/sma-realtime';
+import { render as renderZigZagRealtime } from './examples/zigzag-realtime';
 
-type RenderFn = (container: HTMLElement) => Promise<void>;
+type CleanupFn = () => void;
+type RenderFn = (container: HTMLElement) => Promise<void | CleanupFn>;
 
 const examples: Record<string, RenderFn> = {
   'SMA': renderSMA,
@@ -12,6 +15,8 @@ const examples: Record<string, RenderFn> = {
   'ZigZag': renderZigZag,
   'Supertrend': renderSupertrend,
   'MACD': renderMACD,
+  'SMA (Real-time)': renderSMARealtime,
+  'ZigZag (Real-time)': renderZigZagRealtime,
 };
 
 const tabsContainer = document.getElementById('tabs');
@@ -22,6 +27,7 @@ if (!tabsContainer || !chartContainer) {
 }
 
 let activeTab = Object.keys(examples)[0];
+let currentCleanup: CleanupFn | null = null;
 
 function renderTabs() {
   tabsContainer!.innerHTML = '';
@@ -35,10 +41,20 @@ function renderTabs() {
 }
 
 async function switchTab(name: string) {
+  // Cleanup previous example (important for WebSocket connections)
+  if (currentCleanup) {
+    currentCleanup();
+    currentCleanup = null;
+  }
+
   activeTab = name;
   renderTabs();
   chartContainer!.innerHTML = '';
-  await examples[name](chartContainer!);
+
+  const result = await examples[name](chartContainer!);
+  if (typeof result === 'function') {
+    currentCleanup = result;
+  }
 }
 
 renderTabs();

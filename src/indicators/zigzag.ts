@@ -7,6 +7,12 @@ export interface ZigZagPoint {
   isHigh: boolean;
 }
 
+export interface ZigZagResult {
+  confirmed: ZigZagPoint[];
+  unconfirmed: ZigZagPoint;
+  confirmationPrice: number;
+}
+
 export function calculateZigZag(
   data: OHLCData[],
   deviation: number = 5 // percentage
@@ -122,4 +128,115 @@ export function zigzagToLineData(pivots: ZigZagPoint[]): LineData<UTCTimestamp>[
     time: p.time,
     value: p.value,
   }));
+}
+
+export function calculateZigZagWithState(
+  data: OHLCData[],
+  deviation: number = 5
+): ZigZagResult | null {
+  if (data.length < 2) {
+    return null;
+  }
+
+  const threshold = deviation / 100;
+  const confirmed: ZigZagPoint[] = [];
+
+  let lastPivotIndex = 0;
+  let lastPivotPrice = data[0].high;
+  let isLastPivotHigh = true;
+
+  // Determine initial trend
+  for (let i = 1; i < data.length; i++) {
+    const highChange = (data[i].high - data[0].low) / data[0].low;
+    const lowChange = (data[0].high - data[i].low) / data[0].high;
+
+    if (highChange >= threshold) {
+      lastPivotIndex = 0;
+      lastPivotPrice = data[0].low;
+      isLastPivotHigh = false;
+      confirmed.push({
+        time: data[0].time,
+        value: data[0].low,
+        isHigh: false,
+      });
+      break;
+    } else if (lowChange >= threshold) {
+      lastPivotIndex = 0;
+      lastPivotPrice = data[0].high;
+      isLastPivotHigh = true;
+      confirmed.push({
+        time: data[0].time,
+        value: data[0].high,
+        isHigh: true,
+      });
+      break;
+    }
+  }
+
+  if (confirmed.length === 0) {
+    confirmed.push({
+      time: data[0].time,
+      value: data[0].high,
+      isHigh: true,
+    });
+  }
+
+  // Find subsequent pivots
+  for (let i = 1; i < data.length; i++) {
+    if (isLastPivotHigh) {
+      if (data[i].low < lastPivotPrice) {
+        lastPivotPrice = data[i].low;
+        lastPivotIndex = i;
+      } else {
+        const reversal = (data[i].high - lastPivotPrice) / lastPivotPrice;
+        if (reversal >= threshold) {
+          confirmed.push({
+            time: data[lastPivotIndex].time,
+            value: lastPivotPrice,
+            isHigh: false,
+          });
+          isLastPivotHigh = false;
+          lastPivotPrice = data[i].high;
+          lastPivotIndex = i;
+        }
+      }
+    } else {
+      if (data[i].high > lastPivotPrice) {
+        lastPivotPrice = data[i].high;
+        lastPivotIndex = i;
+      } else {
+        const reversal = (lastPivotPrice - data[i].low) / lastPivotPrice;
+        if (reversal >= threshold) {
+          confirmed.push({
+            time: data[lastPivotIndex].time,
+            value: lastPivotPrice,
+            isHigh: true,
+          });
+          isLastPivotHigh = true;
+          lastPivotPrice = data[i].low;
+          lastPivotIndex = i;
+        }
+      }
+    }
+  }
+
+  // The unconfirmed pivot (isLastPivotHigh tracks what we're LOOKING for, so invert)
+  const unconfirmed: ZigZagPoint = {
+    time: data[lastPivotIndex].time,
+    value: lastPivotPrice,
+    isHigh: !isLastPivotHigh,
+  };
+
+  // Calculate confirmation price
+  // If unconfirmed is a high, price must drop by threshold to confirm
+  // If unconfirmed is a low, price must rise by threshold to confirm
+  const confirmationPrice = unconfirmed.isHigh
+    ? lastPivotPrice * (1 - threshold)
+    : lastPivotPrice * (1 + threshold);
+
+  return {
+    confirmed,
+    unconfirmed,
+    confirmationPrice,
+  };
 }
