@@ -2,6 +2,7 @@ import { render as renderSMA } from './examples/sma';
 import { render as renderRSI } from './examples/rsi';
 import { render as renderZigZag } from './examples/zigzag';
 import { render as renderSupertrend } from './examples/supertrend';
+import { render as renderMACD } from './examples/macd';
 
 type RenderFn = (container: HTMLElement) => Promise<void>;
 
@@ -10,6 +11,7 @@ const examples: Record<string, RenderFn> = {
   'RSI': renderRSI,
   'ZigZag': renderZigZag,
   'Supertrend': renderSupertrend,
+  'MACD': renderMACD,
 };
 
 const tabsContainer = document.getElementById('tabs');
