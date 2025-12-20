@@ -1,5 +1,21 @@
 import { CandlestickData, UTCTimestamp } from 'lightweight-charts';
 
+// Binance REST API kline tuple structure
+type BinanceKline = [
+  number,  // 0: Open time (ms)
+  string,  // 1: Open price
+  string,  // 2: High price
+  string,  // 3: Low price
+  string,  // 4: Close price
+  string,  // 5: Volume
+  number,  // 6: Close time (ms)
+  string,  // 7: Quote asset volume
+  number,  // 8: Number of trades
+  string,  // 9: Taker buy base asset volume
+  string,  // 10: Taker buy quote asset volume
+  string,  // 11: Unused
+];
+
 // Binance WebSocket kline message structure
 export interface BinanceKlineMessage {
   e: string; // event type
@@ -40,10 +56,10 @@ export async function fetchBinanceKlines(
 ): Promise<CandlestickData<UTCTimestamp>[]> {
   const url = `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${interval}&limit=${limit}`;
   const response = await fetch(url);
-  const data: (string | number)[][] = await response.json();
+  const data: BinanceKline[] = await response.json();
 
   return data.map((kline) => ({
-    time: (Number(kline[0]) / 1000) as UTCTimestamp,
+    time: (kline[0] / 1000) as UTCTimestamp,
     open: Number(kline[1]),
     high: Number(kline[2]),
     low: Number(kline[3]),
