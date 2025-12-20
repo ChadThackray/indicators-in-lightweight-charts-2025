@@ -1,4 +1,4 @@
-import { createChart, CandlestickSeries, LineSeries } from 'lightweight-charts';
+import { createChart, CandlestickSeries, LineSeries, LineStyle } from 'lightweight-charts';
 import { loadCsvData } from '../data';
 import { calculateRSI } from '../indicators/rsi';
 
@@ -39,6 +39,25 @@ export async function render(container: HTMLElement): Promise<void> {
 
   const rsiData = calculateRSI(data, 14);
   rsiSeries.setData(rsiData);
+
+  // Add horizontal reference lines
+  rsiSeries.createPriceLine({
+    price: 70,
+    color: '#ef5350',
+    lineWidth: 1,
+    lineStyle: LineStyle.Dashed,
+    axisLabelVisible: true,
+    title: 'Overbought',
+  });
+
+  rsiSeries.createPriceLine({
+    price: 30,
+    color: '#26a69a',
+    lineWidth: 1,
+    lineStyle: LineStyle.Dashed,
+    axisLabelVisible: true,
+    title: 'Oversold',
+  });
 
   const barsToShow = 24 * 10;
   chart.timeScale().setVisibleLogicalRange({
