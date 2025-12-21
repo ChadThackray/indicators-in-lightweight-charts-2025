@@ -113,12 +113,14 @@ export async function render(container: HTMLElement): Promise<() => void> {
   // Set initial confirmed line
   confirmedSeries.setData(zigzagToLineData(lastResult.confirmed));
 
-  // Set initial unconfirmed segment
+  // Set initial unconfirmed segment (only if times differ - lightweight-charts requires ascending order)
   const lastConfirmed = lastResult.confirmed[lastResult.confirmed.length - 1];
-  unconfirmedSeries.setData([
-    { time: lastConfirmed.time, value: lastConfirmed.value },
-    { time: lastResult.unconfirmed.time, value: lastResult.unconfirmed.value },
-  ]);
+  if (lastConfirmed.time !== lastResult.unconfirmed.time) {
+    unconfirmedSeries.setData([
+      { time: lastConfirmed.time, value: lastConfirmed.value },
+      { time: lastResult.unconfirmed.time, value: lastResult.unconfirmed.value },
+    ]);
+  }
 
   // Create markers for confirmed pivots
   const markersPlugin = createSeriesMarkers(candleSeries, [
@@ -180,12 +182,16 @@ export async function render(container: HTMLElement): Promise<() => void> {
       lastConfirmedCount = result.confirmed.length;
     }
 
-    // Always update unconfirmed segment (cheap - just 2 points)
+    // Always update unconfirmed segment (only if times differ - lightweight-charts requires ascending order)
     const lastConfirmedPivot = result.confirmed[result.confirmed.length - 1];
-    unconfirmedSeries.setData([
-      { time: lastConfirmedPivot.time, value: lastConfirmedPivot.value },
-      { time: result.unconfirmed.time, value: result.unconfirmed.value },
-    ]);
+    if (lastConfirmedPivot.time !== result.unconfirmed.time) {
+      unconfirmedSeries.setData([
+        { time: lastConfirmedPivot.time, value: lastConfirmedPivot.value },
+        { time: result.unconfirmed.time, value: result.unconfirmed.value },
+      ]);
+    } else {
+      unconfirmedSeries.setData([]);
+    }
 
     // Update threshold line position
     thresholdLine.applyOptions({ price: result.confirmationPrice });
