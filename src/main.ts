@@ -22,21 +22,23 @@ const examples: Record<string, RenderFn> = {
 const tabsContainer = document.getElementById('tabs');
 const chartContainer = document.getElementById('chart');
 
-if (!tabsContainer || !chartContainer) {
-  throw new Error('Required containers not found');
-}
+if (!tabsContainer) throw new Error('Tabs container not found');
+const tabsContainerValidated = tabsContainer
+
+if (!chartContainer) throw new Error('Tabs container not found');
+const chartContainerValidated = chartContainer
 
 let activeTab = Object.keys(examples)[0];
 let currentCleanup: CleanupFn | null = null;
 
 function renderTabs() {
-  tabsContainer!.innerHTML = '';
+  tabsContainerValidated.innerHTML = '';
   for (const name of Object.keys(examples)) {
     const button = document.createElement('button');
     button.className = `tab${name === activeTab ? ' active' : ''}`;
     button.textContent = name;
     button.onclick = () => switchTab(name);
-    tabsContainer!.appendChild(button);
+    tabsContainerValidated.appendChild(button);
   }
 }
 
@@ -49,9 +51,9 @@ async function switchTab(name: string) {
 
   activeTab = name;
   renderTabs();
-  chartContainer!.innerHTML = '';
+  chartContainerValidated.innerHTML = '';
 
-  const result = await examples[name](chartContainer!);
+  const result = await examples[name](chartContainerValidated);
   if (typeof result === 'function') {
     currentCleanup = result;
   }
