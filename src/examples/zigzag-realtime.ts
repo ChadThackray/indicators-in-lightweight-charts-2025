@@ -175,14 +175,25 @@ export async function render(container: HTMLElement): Promise<() => void> {
     if (!result) return;
 
     // Check if a new pivot was confirmed
-    if (result.confirmed.length > lastConfirmedCount) {
+    const newPivotConfirmed = result.confirmed.length > lastConfirmedCount;
+    if (newPivotConfirmed) {
       // New pivot confirmed - update confirmed series with new point
       const newConfirmed = result.confirmed[result.confirmed.length - 1];
       confirmedSeries.update({ time: newConfirmed.time, value: newConfirmed.value });
       lastConfirmedCount = result.confirmed.length;
     }
 
-    // Always update unconfirmed segment (only if times differ - lightweight-charts requires ascending order)
+    // Skip updates if unconfirmed point hasn't changed and no new pivot was confirmed
+    const unconfirmedChanged =
+      !lastResult ||
+      result.unconfirmed.time !== lastResult.unconfirmed.time ||
+      result.unconfirmed.value !== lastResult.unconfirmed.value;
+
+    if (!unconfirmedChanged && !newPivotConfirmed) {
+      return;
+    }
+
+    // Update unconfirmed segment (only if times differ - lightweight-charts requires ascending order)
     const lastConfirmedPivot = result.confirmed[result.confirmed.length - 1];
     if (lastConfirmedPivot.time !== result.unconfirmed.time) {
       unconfirmedSeries.setData([
