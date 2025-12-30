@@ -11,6 +11,7 @@ import {
   BinanceKlineMessage,
   binanceKlineToCandlestick,
 } from '../data';
+import { calculateSMA } from '../indicators/sma';
 
 const SMA_PERIOD = 20;
 
@@ -74,16 +75,8 @@ export async function render(container: HTMLElement): Promise<() => void> {
   candleSeries.setData(data);
 
   // Calculate initial SMA
-  for (let i = SMA_PERIOD - 1; i < data.length; i++) {
-    let sum = 0;
-    for (let j = 0; j < SMA_PERIOD; j++) {
-      sum += data[i - j].close;
-    }
-    smaSeries.update({
-      time: data[i].time,
-      value: sum / SMA_PERIOD,
-    });
-  }
+  const smaData = calculateSMA(data, SMA_PERIOD);
+  smaSeries.setData(smaData);
 
   // Set initial visible range
   const barsToShow = 100;
